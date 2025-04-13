@@ -12,6 +12,10 @@ A comprehensive web application for managing mess rebates for student hostels an
   - [3. Frontend Setup](#3-frontend-setup)
 - [Configuration](#configuration)
   - [Environment Variables](#environment-variables)
+- [Database Setup](#database-setup)
+  - [Creating the Database](#creating-the-database)
+  - [Database Schema](#database-schema)
+  - [Sample Data (Optional)](#sample-data-optional)
 - [Usage](#usage)
 - [API Documentation](#api-documentation)
 - [Project Structure](#project-structure)
@@ -101,6 +105,74 @@ GALA_DINNER_COST=225.00   # Default cost for gala dinners
 #### Frontend Configuration
 ```
 VITE_API_BASE_URL=http://localhost:5000  # Backend API URL for the frontend
+```
+
+## Database Setup
+
+### Creating the Database
+
+```sql
+CREATE DATABASE mess_rebate;
+USE mess_rebate;
+```
+
+### Database Schema
+
+You'll need to set up the following tables in your MySQL database:
+
+1. **Mess Managers Table**
+```sql
+CREATE TABLE mess_managers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+```
+
+2. **Students Table**
+```sql
+CREATE TABLE students (
+    roll_no VARCHAR(10) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    mobile_no VARCHAR(15) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    branch VARCHAR(50) NOT NULL,
+    batch INT NOT NULL
+);
+```
+
+3. **Rebates Table**
+```sql
+CREATE TABLE rebates (
+    roll_no VARCHAR(10),
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    rebate_days INT NOT NULL,
+    PRIMARY KEY (roll_no, start_date),
+    FOREIGN KEY (roll_no) REFERENCES students(roll_no) ON DELETE CASCADE
+);
+```
+
+### Sample Data (Optional)
+
+To test the system, you can populate the database with sample data:
+
+```sql
+-- Insert default admin
+INSERT INTO mess_managers (username, password) 
+VALUES ('admin', '$2a$10$6HKjduvnCrA6HcQT9Oe6C.ECRwKLRjZULncNKJGjlFvWzS4.xnmLy'); -- password: admin123
+
+-- Insert sample students
+INSERT INTO students (roll_no, name, mobile_no, email, branch, batch) VALUES
+('2023001', 'John Doe', '9876543210', 'john@example.com', 'Computer Science', 2023),
+('2023002', 'Jane Smith', '9876543211', 'jane@example.com', 'Electrical Engineering', 2023),
+('2023003', 'Bob Johnson', '9876543212', 'bob@example.com', 'Mechanical Engineering', 2023);
+
+-- Insert sample rebates
+INSERT INTO rebates (roll_no, start_date, end_date, rebate_days) VALUES
+('2023001', '2023-09-01', '2023-09-05', 5),
+('2023002', '2023-09-10', '2023-09-15', 6),
+('2023003', '2023-09-20', '2023-09-22', 3);
 ```
 
 ## Usage
