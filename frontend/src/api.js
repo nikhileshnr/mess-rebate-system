@@ -27,6 +27,7 @@ const apiRequest = async (method, url, data = null, params = null) => {
   try {
     return await api({ method, url, data, params });
   } catch (error) {
+    console.error("API Request Error:", error);
     throw error;
   }
 };
@@ -34,7 +35,7 @@ const apiRequest = async (method, url, data = null, params = null) => {
 // Auth APIs
 export const login = (credentials) => apiRequest('post', "/api/login", credentials);
 export const checkLoginStatus = () => apiRequest('get', "/api/checkLoginStatus");
-export const logout = () => apiRequest('post', "/api/logout");
+export const logout = () => apiRequest('post', "/api/logout", {});
 
 // Rebate APIs
 export const applyRebate = (rebateData) => apiRequest('post', "/api/rebate/create", rebateData);
@@ -55,16 +56,10 @@ export const fetchStatistics = (filters) => {
   if (filters.branch) params.append('branch', filters.branch);
   if (filters.batch) params.append('batch', filters.batch);
   if (filters.viewType) params.append('viewType', filters.viewType);
+  if (filters.page) params.append('page', filters.page);
+  if (filters.limit) params.append('limit', filters.limit);
   
   return apiRequest('get', `/api/statistics`, null, params);
-};
-
-export const fetchStudentStatisticsByBranch = (year, branch) => {
-  const params = new URLSearchParams();
-  if (year) params.append('year', year);
-  if (branch) params.append('branch', branch);
-  
-  return apiRequest('get', `/api/statistics/students-by-branch`, null, params);
 };
 
 // Price Settings APIs

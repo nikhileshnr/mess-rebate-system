@@ -12,6 +12,11 @@ export const login = async (req, res, next) => {
       return next(createAuthError("User not found"));
     }
 
+    // Ensure exact username match (case-sensitive)
+    if (username !== manager.username) {
+      return next(createAuthError("Invalid credentials"));
+    }
+
     // Compare passwords
     const isMatch = bcrypt.compareSync(password, manager.password);
     if (!isMatch) {

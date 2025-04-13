@@ -59,11 +59,6 @@ const createNotFoundError = (message) => {
   return new AppError(message, ERROR_TYPES.NOT_FOUND, 404);
 };
 
-// Duplicate entry error creator
-const createDuplicateError = (message) => {
-  return new AppError(message, ERROR_TYPES.DUPLICATE, 409);
-};
-
 export {
   ERROR_TYPES,
   AppError,
@@ -71,6 +66,5 @@ export {
   createValidationError,
   createDatabaseError,
   createAuthError,
-  createNotFoundError,
-  createDuplicateError
+  createNotFoundError
 }; 

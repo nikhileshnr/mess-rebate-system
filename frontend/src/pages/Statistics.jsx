@@ -35,15 +35,42 @@ const Statistics = () => {
     year: '',
     branch: '',
     batch: '',
+    page: 1,
+    limit: 20
   });
   const [sortOrder, setSortOrder] = useState('desc');
+  const [allFilterOptions, setAllFilterOptions] = useState({
+    years: [],
+    branches: [],
+    batches: []
+  });
 
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await fetchStatistics(filters);
+      
+      // Only include page and limit parameters if on the users tab
+      const apiFilters = {
+        ...filters,
+        // Only paginate when viewing users tab
+        ...(activeTab === 'users' ? { page: filters.page, limit: filters.limit } : { page: undefined, limit: undefined })
+      };
+      
+      const response = await fetchStatistics(apiFilters);
       console.log("Statistics data:", response);
-      setStats(response);
+      
+      // Update the response to use all available options instead of filtered ones
+      const updatedResponse = {
+        ...response,
+        filters: {
+          // Only use the stored options if they exist, otherwise use the response
+          years: allFilterOptions.years.length > 0 ? allFilterOptions.years : response.filters.years,
+          branches: allFilterOptions.branches.length > 0 ? allFilterOptions.branches : response.filters.branches,
+          batches: allFilterOptions.batches.length > 0 ? allFilterOptions.batches : response.filters.batches
+        }
+      };
+      
+      setStats(updatedResponse);
     } catch (error) {
       console.error('Error fetching statistics:', error);
     } finally {
@@ -53,17 +80,54 @@ const Statistics = () => {
 
   useEffect(() => {
     fetchStats();
-  }, [filters]);
+  }, [filters, activeTab]); // Remove allFilterOptions from dependencies
+
+  // Add a separate useEffect to ensure allFilterOptions is only updated once on initial load
+  useEffect(() => {
+    if (stats && !allFilterOptions.years.length) {
+      setAllFilterOptions({
+        years: stats.filters.years,
+        branches: stats.filters.branches,
+        batches: stats.filters.batches
+      });
+    }
+  }, [stats]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
+    
+    // Reset pagination when filter changes
+    if (name !== 'page') {
+      setFilters(prev => ({
+        ...prev,
+        [name]: value,
+        page: 1 // Reset to first page
+      }));
+    } else {
+      setFilters(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const handlePageChange = (newPage) => {
     setFilters(prev => ({
       ...prev,
-      [name]: value
+      page: newPage
     }));
   };
 
   const handleTabChange = (tab) => {
+    // When changing tabs, special handling for users tab
+    if (tab === 'users' && activeTab !== 'users') {
+      // When switching to users tab, ensure pagination is applied
+      fetchStats();
+    } else if (activeTab === 'users' && tab !== 'users') {
+      // When leaving users tab, get full data for other tabs
+      fetchStats();
+    }
+    
     setActiveTab(tab);
   };
 
@@ -126,26 +190,8 @@ const Statistics = () => {
           'rgba(231, 76, 60, 0.7)',    // Pomegranate
           'rgba(26, 188, 156, 0.7)',   // Turquoise
         ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)',
-          'rgba(201, 203, 207, 1)',
-          'rgba(255, 99, 71, 1)',
-          'rgba(46, 204, 113, 1)',
-          'rgba(52, 152, 219, 1)',
-          'rgba(155, 89, 182, 1)',
-          'rgba(241, 196, 15, 1)',
-          'rgba(230, 126, 34, 1)',
-          'rgba(231, 76, 60, 1)',
-          'rgba(26, 188, 156, 1)',
-        ],
-        borderWidth: 1,
-      },
-    ],
+      }
+    ]
   };
 
   // Prepare data for batch statistics
@@ -153,14 +199,13 @@ const Statistics = () => {
     labels: Object.keys(stats.batchStats),
     datasets: [
       {
-        label: 'Average Days per Student by Batch',
+        label: 'Average Days by Batch',
         data: Object.values(stats.batchStats).map(batch => batch.averageDaysPerStudent),
-        backgroundColor: 'rgba(75, 192, 192, 0.5)',
-      },
-    ],
+        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+      }
+    ]
   };
 
-  // Render Overview Tab Content
   const renderOverviewTab = () => (
     <div>
       {/* Overview Cards */}
@@ -204,7 +249,54 @@ const Statistics = () => {
     </div>
   );
 
-  // Render Users Tab Content with sorting toggle
+  // Render pagination controls
+  const renderPagination = () => {
+    if (!stats.pagination) return null;
+    
+    const { currentPage, totalPages } = stats.pagination;
+    
+    return (
+      <div className="flex justify-center mt-6">
+        <div className="flex items-center space-x-2">
+          <button 
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400'}`}
+          >
+            First
+          </button>
+          <button 
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400'}`}
+          >
+            Prev
+          </button>
+          
+          <span className="px-3 py-1">
+            Page {currentPage} of {totalPages}
+          </span>
+          
+          <button 
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400'}`}
+          >
+            Next
+          </button>
+          <button 
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500' : 'bg-gray-300 hover:bg-gray-400'}`}
+          >
+            Last
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Render Users Tab Content with sorting toggle and pagination
   const renderUsersTab = () => {
     if (!stats || !stats.allUsers) {
       return (
@@ -237,6 +329,14 @@ const Statistics = () => {
             </select>
           </div>
         </div>
+        
+        <div className="mt-2 mb-4">
+          <span className="text-sm text-gray-600">
+            Showing {stats.pagination?.currentPage || 1} of {stats.pagination?.totalPages || 1} pages 
+            ({stats.pagination?.totalItems || sortedUsers.length} total items)
+          </span>
+        </div>
+        
         <div className="overflow-x-auto">
           <table className="min-w-full">
             <thead>
@@ -251,20 +351,28 @@ const Statistics = () => {
               </tr>
             </thead>
             <tbody>
-              {sortedUsers.map((user, index) => (
-                <tr key={user.roll_no} className="border-t">
-                  <td className="px-6 py-4">{index + 1}</td>
-                  <td className="px-6 py-4">{user.name}</td>
-                  <td className="px-6 py-4">{user.roll_no}</td>
-                  <td className="px-6 py-4">{user.branch}</td>
-                  <td className="px-6 py-4">{user.batch}</td>
-                  <td className="px-6 py-4">{user.filteredRebates}</td>
-                  <td className="px-6 py-4">{user.filteredDays}</td>
-                </tr>
-              ))}
+              {sortedUsers.map((user, index) => {
+                const rank = stats.pagination 
+                  ? (stats.pagination.currentPage - 1) * stats.pagination.itemsPerPage + index + 1
+                  : index + 1;
+                  
+                return (
+                  <tr key={user.roll_no} className="border-t">
+                    <td className="px-6 py-4">{rank}</td>
+                    <td className="px-6 py-4">{user.name}</td>
+                    <td className="px-6 py-4">{user.roll_no}</td>
+                    <td className="px-6 py-4">{user.branch}</td>
+                    <td className="px-6 py-4">{user.batch}</td>
+                    <td className="px-6 py-4">{user.filteredRebates}</td>
+                    <td className="px-6 py-4">{user.filteredDays}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
+        
+        {renderPagination()}
       </div>
     );
   };
@@ -442,4 +550,4 @@ const Statistics = () => {
   );
 };
 
-export default Statistics; 
+export default Statistics;

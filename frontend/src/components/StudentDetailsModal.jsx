@@ -69,7 +69,7 @@ const StudentDetailsModal = ({ student, onClose }) => {
   };
 
   const calculateTotalDays = () => {
-    return getFilteredRebates().reduce((total, rebate) => total + rebate.rebate_days, 0);
+    return getFilteredRebates().reduce((total, rebate) => total + (rebate.days || 0), 0);
   };
 
   if (loading) {
@@ -134,8 +134,7 @@ const StudentDetailsModal = ({ student, onClose }) => {
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
-            >
+              className="text-gray-400 hover:text-gray-600 transition-colors duration-200">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -207,7 +206,7 @@ const StudentDetailsModal = ({ student, onClose }) => {
                           {new Date(rebate.end_date).toLocaleDateString()}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                          {rebate.rebate_days}
+                          {rebate.days}
                         </td>
                       </tr>
                     ))}

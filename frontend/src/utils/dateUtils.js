@@ -1,6 +1,5 @@
 // Caching object for formatted dates to avoid repeated formatting
 const dateFormatCache = new Map();
-const dateInputFormatCache = new Map();
 
 // Format date from ISO to dd-mm-yyyy with caching
 export const formatDate = (dateString) => {
@@ -21,24 +20,6 @@ export const formatDate = (dateString) => {
   // Store in cache
   dateFormatCache.set(dateString, formatted);
   return formatted;
-};
-
-// Format date for input type="date" (yyyy-mm-dd)
-export const formatDateForInput = (dateString) => {
-  if (!dateString) return "";
-  
-  // Return from cache if available
-  if (dateInputFormatCache.has(dateString)) {
-    return dateInputFormatCache.get(dateString);
-  }
-  
-  // Using substring for better performance
-  const date = new Date(dateString);
-  const isoDate = date.toISOString().substring(0, 10);
-  
-  // Store in cache
-  dateInputFormatCache.set(dateString, isoDate);
-  return isoDate;
 };
 
 // Calculate rebate days between two dates

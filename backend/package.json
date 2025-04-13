@@ -4,7 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "add-indexes": "node scripts/add_indexes.js"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +21,7 @@
     "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.0",
+    "node-cache": "^5.1.2",
     "sequelize": "^6.37.7"
   }
 }

@@ -8,7 +8,7 @@ import statisticsRoutes from "./routes/statisticsRoutes.js";
 import priceSettingsRoutes from "./routes/priceSettingsRoutes.js";
 import { testConnection } from "./config/db.js";
 import config from "./config/config.js";
-import { handleError } from "./utils/errorHandler.js";
+import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
 
@@ -25,7 +25,7 @@ app.use("/api/statistics", statisticsRoutes);
 app.use("/api/price-settings", priceSettingsRoutes);
 
 // Error handling middleware
-app.use(handleError);
+app.use(errorHandler);
 
 // Start server
 const startServer = async () => {

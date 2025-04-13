@@ -344,18 +344,18 @@ const ViewRebates = () => {
           if (adjustedRebates.length > 1) {
             for (let i = 1; i < adjustedRebates.length; i++) {
               worksheet.addRow([
-                index + 1,                    // S.No
-                student.name,                 // Student Name
-                student.roll_no,              // Roll No
+                '',                            // S.No - blank for subsequent entries
+                '',                            // Student Name - blank for subsequent entries
+                '',                            // Roll No - blank for subsequent entries
                 formatDate(adjustedRebates[i].adjustedStartDate), // Date From
                 formatDate(adjustedRebates[i].adjustedEndDate),   // Date To
                 0,                            // Rebate Days
-                feastDayPresence,             // Feast Day
-                totalDays,                    // Total Days
-                feastAmount,                  // Feast Amount
-                amount,                       // Amount
-                gst,                          // GST
-                totalAmount                   // Total Amount
+                '',                           // Feast Day - blank for subsequent entries
+                '',                           // Total Days - blank for subsequent entries
+                '',                           // Feast Amount - blank for subsequent entries
+                '',                           // Amount - blank for subsequent entries
+                '',                           // GST - blank for subsequent entries
+                ''                            // Total Amount - blank for subsequent entries
               ]);
             }
           }
@@ -571,12 +571,12 @@ const ViewRebates = () => {
                     <tr key={`${rebate.roll_no}-${rebate.start_date}`} className="hover:bg-gray-100">
                       <td className="border px-4 py-2">{index + 1}</td>
                       <td className="border px-4 py-2">{rebate.roll_no}</td>
-                      <td className="border px-4 py-2">{rebate.name}</td>
+                      <td className="border px-4 py-2">{rebate.student_name}</td>
                       <td className="border px-4 py-2">{rebate.branch}</td>
                       <td className="border px-4 py-2">{rebate.batch}</td>
                       <td className="border px-4 py-2">{formatDate(rebate.start_date)}</td>
                       <td className="border px-4 py-2">{formatDate(rebate.end_date)}</td>
-                      <td className="border px-4 py-2">{rebate.rebate_days}</td>
+                      <td className="border px-4 py-2">{rebate.days}</td>
                     </tr>
                   ))
                 ) : (

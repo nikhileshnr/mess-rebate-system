@@ -1,6 +1,7 @@
-import { getAllStudents as getAllStudentsModel, getStudentById } from '../models/studentModel.js';
+import { getAllStudents as getAllStudentsModel } from '../models/studentModel.js';
 import { fetchStudentRebates } from '../models/rebateModel.js';
 import { createDatabaseError, createNotFoundError } from '../utils/errorHandler.js';
+import * as StudentService from '../services/studentService.js';
 
 export const getAllStudents = async (req, res, next) => {
   try {
@@ -15,7 +16,7 @@ export const getStudentByRollNo = async (req, res, next) => {
   try {
     const { rollNo } = req.params;
     
-    const student = await getStudentById(rollNo);
+    const student = await StudentService.getStudentByRollNo(rollNo);
     if (!student) {
       return next(createNotFoundError('Student not found'));
     }
