@@ -28,15 +28,17 @@ A comprehensive web application for managing mess rebates for student hostels an
 - **Rebate Management**: Create, view, and manage student mess rebates
 - **Student Database**: Store and retrieve student information
 - **Authentication System**: Secure login for administrators
-- **Statistics & Reports**: Generate detailed statistics and reports
+- **Statistics & Reports**: Generate detailed statistics and reports with interactive charts
 - **Dynamic Pricing**: Configurable pricing for mess services
 - **User-Friendly Interface**: Modern UI built with React and Tailwind CSS
+- **Data Export**: Export rebate data to Excel for further analysis
+- **Responsive Design**: Works on desktop and mobile devices
 
 ## System Requirements
 
-- **Node.js**: v14.0.0 or higher
+- **Node.js**: v16.0.0 or higher
 - **MySQL**: 5.7 or higher
-- **npm**: 6.0.0 or higher
+- **npm**: 7.0.0 or higher
 
 ## Installation
 
@@ -242,55 +244,67 @@ mess-rebate-system/
 ├── backend/                   # Backend Node.js application
 │   ├── config/                # Configuration files
 │   ├── controllers/           # Controller functions for routes
+│   ├── dto/                   # Data Transfer Objects
+│   ├── errors/                # Error handling
 │   ├── middleware/            # Express middleware
+│   ├── migrations/            # Database migrations
 │   ├── models/                # Database models
+│   ├── repositories/          # Data access layer
 │   ├── routes/                # API route definitions
 │   ├── scripts/               # Utility scripts
+│   ├── services/              # Business logic
 │   ├── utils/                 # Utility functions
+│   ├── validators/            # Request validation
 │   └── server.js              # Main server file
-│
 ├── frontend/                  # Frontend React application
-│   ├── public/                # Static files
+│   ├── public/                # Static assets
 │   ├── src/                   # Source code
-│   │   ├── assets/            # Images, fonts, etc.
-│   │   ├── components/        # Reusable React components
-│   │   ├── pages/             # Page components
-│   │   ├── utils/             # Utility functions
-│   │   ├── App.jsx            # Main App component
-│   │   └── main.jsx           # Entry point
-│   ├── index.html             # HTML template
-│   └── vite.config.js         # Vite configuration
-│
-├── .env.example               # Example environment variables
-└── README.md                  # Project documentation
+│       ├── assets/            # Images and other assets
+│       ├── components/        # Reusable UI components
+│       ├── pages/             # Page components
+│       ├── utils/             # Utility functions
+│       ├── App.jsx            # Main App component
+│       ├── api.js             # API communication
+│       ├── index.js           # Application core functions
+│       ├── vite.config.js         # Vite configuration
+│       └── main.jsx           # Application entry point
 ```
+
+## Technologies Used
+
+### Backend
+- **Node.js** - JavaScript runtime
+- **Express** - Web framework
+- **MySQL** - Database
+- **Sequelize** - ORM for database operations
+- **JWT** - Authentication
+
+### Frontend
+- **React 19** - UI library
+- **React Router** - Client-side routing
+- **Tailwind CSS** - Utility-first CSS framework
+- **Chart.js** - Data visualization
+- **Axios** - HTTP client
+- **ExcelJS** - Excel file generation
+- **Vite** - Build tool and dev server
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Database Connection Errors**
-   - Verify that MySQL is running
-   - Check that database credentials in `.env` file are correct
-   - Ensure the specified database exists
+#### Backend Connection Issues
+- Ensure MySQL is running
+- Check `.env` file for correct database credentials
+- Verify network connectivity if using a remote database
 
-2. **Backend API Unavailable**
-   - Check that the backend server is running
-   - Verify that the port (default: 5000) is not in use by another application
-
-3. **Frontend Cannot Connect to Backend**
-   - Check that the `VITE_API_BASE_URL` is correctly set
-   - Ensure CORS is properly configured if running on different domains
+#### Frontend API Connection
+- Check that the backend server is running
+- Verify the `VITE_API_BASE_URL` points to the correct backend URL
+- Check browser console for CORS errors
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 ## License
 
