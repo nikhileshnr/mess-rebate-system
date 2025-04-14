@@ -256,8 +256,41 @@ const calculateBatchStats = (rebates, studentMap, batches) => {
  * Clear the statistics cache
  */
 const clearStatsCache = () => {
-  statsCache.flushAll();
-  return { success: true, message: 'Statistics cache cleared' };
+  try {
+    if (!statsCache) {
+      console.warn('Stats cache is not initialized');
+      return {
+        success: true,
+        message: 'No cache to clear',
+        clearedEntries: 0,
+        timestamp: new Date().toISOString()
+      };
+    }
+    
+    const cacheKeys = statsCache.keys() || [];
+    const keyCount = cacheKeys.length || 0;
+    console.log(`Clearing statistics cache: ${keyCount} entries found`);
+    
+    // Execute flush and store result
+    const flushResult = statsCache.flushAll();
+    console.log('Statistics cache cleared successfully, result:', flushResult);
+    
+    return { 
+      success: true, 
+      message: 'Statistics cache cleared',
+      clearedEntries: keyCount,
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Error clearing statistics cache:', error);
+    // Return an object even in case of error
+    return { 
+      success: false, 
+      message: 'Failed to clear statistics cache',
+      error: error.message || 'Unknown error',
+      timestamp: new Date().toISOString()
+    };
+  }
 };
 
 export {

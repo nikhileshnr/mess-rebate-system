@@ -25,7 +25,7 @@ export const checkOverlappingRebates = async (roll_no, start_date, end_date) => 
 };
 
 // Function to create a rebate entry
-export const createRebate = async (roll_no, start_date, end_date, rebate_days) => {
+export const createRebate = async (roll_no, start_date, end_date, rebate_days, gate_pass_no) => {
   try {
     // Check for overlapping rebates first
     const hasOverlap = await checkOverlappingRebates(roll_no, start_date, end_date);
@@ -33,8 +33,8 @@ export const createRebate = async (roll_no, start_date, end_date, rebate_days) =
       throw new Error('OVERLAPPING_REBATE');
     }
 
-    const query = "INSERT INTO rebates (roll_no, start_date, end_date, rebate_days) VALUES (?, ?, ?, ?)";
-    const result = await executeQuery(query, [roll_no, start_date, end_date, rebate_days]);
+    const query = "INSERT INTO rebates (roll_no, start_date, end_date, rebate_days, gate_pass_no) VALUES (?, ?, ?, ?, ?)";
+    const result = await executeQuery(query, [roll_no, start_date, end_date, rebate_days, gate_pass_no]);
     return result;
   } catch (error) {
     throw error;
@@ -46,7 +46,7 @@ export const fetchAllRebates = async () => {
   try {
     const query = `
       SELECT r.roll_no, s.name, s.branch, s.batch, 
-             r.start_date, r.end_date, r.rebate_days
+             r.start_date, r.end_date, r.rebate_days, r.gate_pass_no
       FROM rebates r
       JOIN students s ON r.roll_no = s.roll_no
       ORDER BY r.start_date DESC;
@@ -62,7 +62,7 @@ export const fetchStudentRebates = async (roll_no) => {
   try {
     const query = `
       SELECT r.roll_no, s.name, s.branch, s.batch, 
-             r.start_date, r.end_date, r.rebate_days
+             r.start_date, r.end_date, r.rebate_days, r.gate_pass_no
       FROM rebates r
       JOIN students s ON r.roll_no = s.roll_no
       WHERE r.roll_no = ?

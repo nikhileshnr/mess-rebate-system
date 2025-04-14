@@ -16,17 +16,45 @@ api.interceptors.response.use(
   (error) => {
     const errorResponse = error.response?.data?.error || {
       message: "An unexpected error occurred",
-      type: "UNKNOWN_ERROR",
+      code: "UNKNOWN_ERROR",
     };
-    return Promise.reject(errorResponse);
+    
+    // Extract all properties from the error response
+    const enhancedError = {
+      message: errorResponse.message || "An unexpected error occurred",
+      code: errorResponse.errorCode || errorResponse.code || "UNKNOWN_ERROR",
+      field: errorResponse.field || null,
+      rule: errorResponse.rule || null,
+      resource: errorResponse.resource || null,
+      // Include original status code
+      status: error.response?.status || 500
+    };
+    
+    console.error("API Error Response:", enhancedError);
+    return Promise.reject(enhancedError);
   }
 );
 
 // Generic request handler to reduce code duplication
 const apiRequest = async (method, url, data = null, params = null) => {
   try {
-    return await api({ method, url, data, params });
+    // Add a timeout to prevent hanging requests
+    const requestData = method.toLowerCase() === 'post' && data === null ? {} : data;
+    const response = await api({ method, url, data: requestData, params, timeout: 10000 });
+    
+    // Handle the case where response might be null
+    return response === null ? { success: true } : response;
   } catch (error) {
+    // Check if error is a SyntaxError (likely from JSON parse failure)
+    if (error instanceof SyntaxError && error.message.includes('JSON')) {
+      console.error("API JSON Parse Error:", error);
+      throw {
+        code: 'PARSE_ERROR',
+        message: 'Failed to parse server response',
+        originalError: error.message
+      };
+    }
+    
     console.error("API Request Error:", error);
     throw error;
   }
@@ -58,8 +86,59 @@ export const fetchStatistics = (filters) => {
   if (filters.viewType) params.append('viewType', filters.viewType);
   if (filters.page) params.append('page', filters.page);
   if (filters.limit) params.append('limit', filters.limit);
+  if (filters._t) params.append('_t', filters._t); // Cache busting parameter
   
   return apiRequest('get', `/api/statistics`, null, params);
+};
+
+// Clear statistics cache
+export const clearStatisticsCache = () => {
+  try {
+    return apiRequest('post', `/api/statistics/clear-cache`, {});
+  } catch (error) {
+    console.error('Failed to clear statistics cache:', error);
+    throw error;
+  }
+};
+
+// Combined operation to refresh statistics 
+// This fetches fresh data even if clearing cache fails
+export const refreshStatistics = async (filters) => {
+  let cacheCleared = false;
+  
+  try {
+    // First try to clear the cache
+    const cacheResult = await clearStatisticsCache();
+    console.log('Cache cleared successfully:', cacheResult);
+    cacheCleared = true;
+  } catch (error) {
+    console.warn('Cache clear failed, continuing with data refresh:', error);
+    // Continue even if cache clear fails
+    cacheCleared = false;
+  }
+  
+  try {
+    // Add cache busting timestamp
+    const refreshFilters = {
+      ...filters,
+      _t: new Date().getTime()
+    };
+    
+    // Always fetch fresh data
+    const result = await fetchStatistics(refreshFilters);
+    
+    // Return both the result and cache status
+    return {
+      ...result,
+      _meta: {
+        cacheCleared,
+        timestamp: new Date().toISOString()
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching statistics data:', error);
+    throw error;
+  }
 };
 
 // Price Settings APIs

@@ -8,16 +8,59 @@ import {
   DatabaseError, 
   BusinessRuleError 
 } from '../errors/applicationErrors.js';
+import { pool, executeQuery } from '../config/db.js';
 
 /**
  * Controller to create a new rebate entry
  */
 export const createRebateEntry = async (req, res, next) => {
   try {
-    const { roll_no, start_date, end_date, rebate_days } = req.body;
+    const { roll_no, start_date, end_date, rebate_days, gate_pass_no, _validate_only } = req.body;
+    
+    // Validate gate_pass_no is present and in correct format
+    if (!gate_pass_no) {
+      return next(new ValidationError('Gate Pass Number is required'));
+    }
+    
+    // Validate gate_pass_no format (A-31287 pattern)
+    if (!gate_pass_no.match(/^[A-Z]-\d+$/)) {
+      return next(new ValidationError('Gate Pass Number must be in the format A-31287'));
+    }
+    
+    // Validate gate_pass_no length
+    if (gate_pass_no.length > 10) {
+      return next(new ValidationError('Gate Pass Number must not exceed 10 characters'));
+    }
+    
+    // Check for duplicate gate pass
+    try {
+      // This SQL checks if the gate pass number already exists
+      const checkDuplicateSql = "SELECT COUNT(*) as count FROM rebates WHERE gate_pass_no = ?";
+      const results = await executeQuery(checkDuplicateSql, [gate_pass_no]);
+      
+      if (results[0].count > 0) {
+        return next(new ValidationError('Gate Pass Number already exists. Please use a different one.', 'gate_pass_no'));
+      }
+      
+      // If this is just a validation check, return success without creating the rebate
+      if (_validate_only) {
+        return res.status(200).json({
+          success: true,
+          message: 'Validation passed. Gate pass number is available.',
+          validated: true
+        });
+      }
+    } catch (error) {
+      console.error("Error checking duplicate gate pass:", error);
+      // If this is a validation-only request, return the error
+      if (_validate_only) {
+        return next(new DatabaseError('Failed to validate gate pass number. Please try again.'));
+      }
+      // Otherwise, continue with the try/catch flow
+    }
     
     // Service layer handles business logic and validation
-    const result = await RebateService.createRebate(roll_no, start_date, end_date, rebate_days);
+    const result = await RebateService.createRebate(roll_no, start_date, end_date, rebate_days, gate_pass_no);
     
     res.status(201).json({
       success: true,
@@ -29,6 +72,9 @@ export const createRebateEntry = async (req, res, next) => {
       next(new NotFoundError('Student not found with the provided roll number', 'student'));
     } else if (error.message === 'OVERLAPPING_REBATE') {
       next(new BusinessRuleError('This rebate period overlaps with an existing rebate entry', 'no-overlap'));
+    } else if (error.code === 'ER_DUP_ENTRY' && error.sqlMessage && error.sqlMessage.includes('gate_pass_no')) {
+      // Handle the duplicate gate pass number error
+      next(new ValidationError('Gate Pass Number already exists. Please use a different one.', 'gate_pass_no'));
     } else {
       next(new DatabaseError('Failed to create rebate entry'));
     }

@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { fetchStatistics } from '../api';
+import { fetchStatistics, clearStatisticsCache, refreshStatistics } from '../api';
 
 // Register ChartJS components
 ChartJS.register(
@@ -44,8 +44,10 @@ const Statistics = () => {
     branches: [],
     batches: []
   });
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshStatus, setRefreshStatus] = useState('');
 
-  const fetchStats = async () => {
+  const fetchStats = async (skipCache = false) => {
     try {
       setLoading(true);
       
@@ -53,7 +55,9 @@ const Statistics = () => {
       const apiFilters = {
         ...filters,
         // Only paginate when viewing users tab
-        ...(activeTab === 'users' ? { page: filters.page, limit: filters.limit } : { page: undefined, limit: undefined })
+        ...(activeTab === 'users' ? { page: filters.page, limit: filters.limit } : { page: undefined, limit: undefined }),
+        // Add cache busting parameter if skipCache is true
+        ...(skipCache ? { _t: new Date().getTime() } : {})
       };
       
       const response = await fetchStatistics(apiFilters);
@@ -75,6 +79,7 @@ const Statistics = () => {
       console.error('Error fetching statistics:', error);
     } finally {
       setLoading(false);
+      // Don't reset refreshing state here as it's handled by the refresh function
     }
   };
 
@@ -131,6 +136,53 @@ const Statistics = () => {
     setActiveTab(tab);
   };
 
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      setRefreshStatus('');
+      
+      // Use the combined function that handles cache clearing and data fetching in one call
+      const response = await refreshStatistics({
+        ...filters,
+        // Only paginate when viewing users tab
+        ...(activeTab === 'users' ? { page: filters.page, limit: filters.limit } : { page: undefined, limit: undefined })
+      });
+      
+      console.log("Refreshed statistics data:", response);
+      
+      // Check if we got a valid response
+      if (!response || typeof response !== 'object') {
+        throw new Error('Invalid response format');
+      }
+      
+      // Extract metadata if available (but don't use it in user messages)
+      const { _meta, ...statsData } = response;
+      
+      // Directly update the stats state with the new response
+      setStats({
+        ...statsData,
+        filters: {
+          // Only use the stored options if they exist, otherwise use the response
+          years: allFilterOptions.years.length > 0 ? allFilterOptions.years : statsData.filters.years,
+          branches: allFilterOptions.branches.length > 0 ? allFilterOptions.branches : statsData.filters.branches,
+          batches: allFilterOptions.batches.length > 0 ? allFilterOptions.batches : statsData.filters.batches
+        }
+      });
+      
+      setRefreshStatus('Statistics refreshed successfully!');
+      
+      // Auto-hide the success message after 3 seconds
+      setTimeout(() => {
+        setRefreshStatus('');
+      }, 3000);
+    } catch (error) {
+      console.error('Error refreshing statistics:', error);
+      setRefreshStatus(`Error refreshing data: ${error.message || 'Unknown error'}. Please try again.`);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -152,7 +204,7 @@ const Statistics = () => {
     labels: stats.monthlyTrends.map(trend => trend.month),
     datasets: [
       {
-        label: 'Total Rebates',
+        label: 'Total Started Rebates',
         data: stats.monthlyTrends.map(trend => trend.totalRebates),
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,
@@ -457,7 +509,35 @@ const Statistics = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Mess Rebate Statistics</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Mess Rebate Statistics</h1>
+        <button 
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center"
+        >
+          {refreshing ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Refreshing...
+            </>
+          ) : 'Refresh Data'}
+        </button>
+      </div>
+
+      {/* Refresh Status Message */}
+      {refreshStatus && (
+        <div className={`mb-4 p-4 ${
+          refreshStatus.includes('Error') 
+            ? 'bg-red-100 border-red-400 text-red-700' 
+            : 'bg-green-100 border-green-400 text-green-700'
+        } border rounded`}>
+          {refreshStatus}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

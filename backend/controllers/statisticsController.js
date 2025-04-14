@@ -32,13 +32,34 @@ const getStatistics = async (req, res, next) => {
 /**
  * Clear statistics cache for admin use
  */
-const clearStatisticsCache = async (req, res, next) => {
+const clearStatisticsCache = (req, res, next) => {
   try {
-    const result = await StatisticsService.clearStatsCache();
-    res.json(result);
+    // The clearStatsCache function is synchronous
+    const result = StatisticsService.clearStatsCache();
+    
+    // Ensure we're always returning a valid JSON object
+    const responseData = result || {
+      success: true,
+      message: 'Statistics cache cleared successfully',
+      timestamp: new Date().toISOString()
+    };
+    
+    // Set proper content type and send the response
+    res.setHeader('Content-Type', 'application/json');
+    
+    // Make sure we're not accidentally returning null
+    // This will ensure we always have a valid response object
+    return res.status(200).json(responseData);
   } catch (error) {
-    console.error('Cache clear error:', error);
-    next(new DatabaseError('Failed to clear statistics cache'));
+    console.error('Cache clear exception:', error);
+    
+    // Ensure error response is also proper JSON
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Failed to clear statistics cache',
+      error: error.message || 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
   }
 };
 

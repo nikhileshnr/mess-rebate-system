@@ -9,7 +9,7 @@ const modalVariants = {
   exit: { opacity: 0, scale: 0.8 }
 };
 
-const Modal = memo(({ studentDetails, rollNo, startDate, endDate, onClose, onConfirm }) => {
+const Modal = memo(({ studentDetails, rollNo, startDate, endDate, onClose, onConfirm, gatePassNo }) => {
   if (!studentDetails) return null;
 
   // Use the utility function for calculating rebate days and memoize the result
@@ -27,8 +27,9 @@ const Modal = memo(({ studentDetails, rollNo, startDate, endDate, onClose, onCon
     { label: "Mob. No.", value: studentDetails.mobile_no },
     { label: "Start Date", value: formatDate(startDate) },
     { label: "End Date", value: formatDate(endDate) },
-    { label: "No. of Rebate Days", value: rebateDays }
-  ], [studentDetails, rollNo, startDate, endDate, rebateDays]);
+    { label: "No. of Rebate Days", value: rebateDays },
+    { label: "Gate Pass No", value: gatePassNo || "N/A" }
+  ], [studentDetails, rollNo, startDate, endDate, rebateDays, gatePassNo]);
 
   return (
     <motion.div 

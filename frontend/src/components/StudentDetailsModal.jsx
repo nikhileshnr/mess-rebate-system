@@ -194,6 +194,7 @@ const StudentDetailsModal = ({ student, onClose }) => {
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</th>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gate Pass No</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-300">
@@ -208,12 +209,15 @@ const StudentDetailsModal = ({ student, onClose }) => {
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
                           {rebate.days}
                         </td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                          {rebate.gate_pass_no || "N/A"}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot className="bg-gray-200">
                     <tr>
-                      <td colSpan="2" className="px-4 py-2 text-right text-sm font-medium text-gray-900">
+                      <td colSpan="3" className="px-4 py-2 text-right text-sm font-medium text-gray-900">
                         Total Days:
                       </td>
                       <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">

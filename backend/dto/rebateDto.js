@@ -9,7 +9,8 @@ const toRebateResponse = (rebate) => {
     batch: rebate.batch,
     start_date: rebate.start_date,
     end_date: rebate.end_date,
-    days: rebate.rebate_days
+    days: rebate.rebate_days,
+    gate_pass_no: rebate.gate_pass_no || "N/A"
   };
 };
 
@@ -21,7 +22,8 @@ const fromRebateRequest = (requestBody) => {
     roll_no: requestBody.roll_no,
     start_date: requestBody.start_date,
     end_date: requestBody.end_date,
-    rebate_days: requestBody.rebate_days
+    rebate_days: requestBody.rebate_days,
+    gate_pass_no: requestBody.gate_pass_no
   };
 };
 

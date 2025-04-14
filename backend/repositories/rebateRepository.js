@@ -25,9 +25,9 @@ const checkOverlappingRebates = async (roll_no, start_date, end_date) => {
 /**
  * Create a new rebate entry
  */
-const createRebate = async (roll_no, start_date, end_date, rebate_days) => {
-  const query = "INSERT INTO rebates (roll_no, start_date, end_date, rebate_days) VALUES (?, ?, ?, ?)";
-  const result = await executeQuery(query, [roll_no, start_date, end_date, rebate_days]);
+const createRebate = async (roll_no, start_date, end_date, rebate_days, gate_pass_no) => {
+  const query = "INSERT INTO rebates (roll_no, start_date, end_date, rebate_days, gate_pass_no) VALUES (?, ?, ?, ?, ?)";
+  const result = await executeQuery(query, [roll_no, start_date, end_date, rebate_days, gate_pass_no]);
   return result;
 };
 
@@ -37,7 +37,7 @@ const createRebate = async (roll_no, start_date, end_date, rebate_days) => {
 const fetchAllRebates = async () => {
   const query = `
     SELECT r.roll_no, s.name, s.branch, s.batch, 
-           r.start_date, r.end_date, r.rebate_days
+           r.start_date, r.end_date, r.rebate_days, r.gate_pass_no
     FROM rebates r
     JOIN students s ON r.roll_no = s.roll_no
     ORDER BY r.start_date DESC;
@@ -53,7 +53,7 @@ const fetchFilteredRebates = async (filters = {}) => {
   
   let query = `
     SELECT r.roll_no, s.name, s.branch, s.batch, 
-           r.start_date, r.end_date, r.rebate_days
+           r.start_date, r.end_date, r.rebate_days, r.gate_pass_no
     FROM rebates r
     JOIN students s ON r.roll_no = s.roll_no
     WHERE 1=1
@@ -101,7 +101,7 @@ const fetchAllFilteredRebates = async (filters = {}) => {
   
   let query = `
     SELECT r.roll_no, s.name, s.branch, s.batch, 
-           r.start_date, r.end_date, r.rebate_days
+           r.start_date, r.end_date, r.rebate_days, r.gate_pass_no
     FROM rebates r
     JOIN students s ON r.roll_no = s.roll_no
     WHERE 1=1
@@ -179,7 +179,7 @@ const getOverviewStats = async (filters = {}) => {
 const fetchStudentRebates = async (roll_no) => {
   const query = `
     SELECT r.roll_no, s.name, s.branch, s.batch, 
-           r.start_date, r.end_date, r.rebate_days
+           r.start_date, r.end_date, r.rebate_days, r.gate_pass_no
     FROM rebates r
     JOIN students s ON r.roll_no = s.roll_no
     WHERE r.roll_no = ?

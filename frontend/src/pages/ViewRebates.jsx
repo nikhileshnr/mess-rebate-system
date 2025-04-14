@@ -563,6 +563,7 @@ const ViewRebates = () => {
                   <th className="border px-4 py-2 whitespace-nowrap">Start Date</th>
                   <th className="border px-4 py-2 whitespace-nowrap">End Date</th>
                   <th className="border px-4 py-2 whitespace-nowrap">Rebate Days</th>
+                  <th className="border px-4 py-2 whitespace-nowrap">Gate Pass No</th>
                 </tr>
               </thead>
               <tbody>
@@ -577,11 +578,12 @@ const ViewRebates = () => {
                       <td className="border px-4 py-2">{formatDate(rebate.start_date)}</td>
                       <td className="border px-4 py-2">{formatDate(rebate.end_date)}</td>
                       <td className="border px-4 py-2">{rebate.days}</td>
+                      <td className="border px-4 py-2">{rebate.gate_pass_no || "N/A"}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="8" className="border px-4 py-2 text-center">
+                    <td colSpan="9" className="border px-4 py-2 text-center">
                       {selectedMonth && selectedBatch ? "No rebate entries found for the selected criteria." : "Please select a month and batch to view rebates."}
                     </td>
                   </tr>
