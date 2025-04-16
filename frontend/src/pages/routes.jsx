@@ -5,6 +5,7 @@ import CreateRebate from "./CreateRebate";
 import ViewRebates from "./ViewRebates";
 import StudentsList from "../components/StudentsList";
 import Statistics from "./Statistics";
+import EditRebates from "./EditRebates";
 import ProtectedRoute from "./ProtectedRoute";
 
 export default function AppRoutes() {
@@ -16,6 +17,7 @@ export default function AppRoutes() {
           <Route index element={<CreateRebate />} />
           <Route path="createrebate" element={<CreateRebate />} />
           <Route path="viewrebates" element={<ViewRebates />} />
+          <Route path="editrebates" element={<EditRebates />} />
           <Route path="students" element={<StudentsList />} />
           <Route path="statistics" element={<Statistics />} />
         </Route>

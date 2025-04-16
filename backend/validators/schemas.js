@@ -53,6 +53,37 @@ const rebateSchemas = {
         return true;
       }
     }
+  },
+  updateMultiple: {
+    rebates: {
+      required: true,
+      type: 'array',
+      minLength: 1,
+      items: {
+        type: 'object',
+        properties: {
+          id: {
+            required: true,
+            type: 'string'
+          },
+          roll_no: {
+            required: true,
+            type: 'string',
+            minLength: 1
+          },
+          start_date: {
+            required: false,
+            type: 'string',
+            isDate: true
+          },
+          end_date: {
+            required: false,
+            type: 'string',
+            isDate: true
+          }
+        }
+      }
+    }
   }
 };
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useMemo } from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { checkLoginStatus, logout } from "../api";
-import { FaSignOutAlt, FaClipboardList, FaTable, FaUsers, FaChartBar } from "react-icons/fa";
+import { FaSignOutAlt, FaClipboardList, FaTable, FaUsers, FaChartBar, FaEdit } from "react-icons/fa";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -39,6 +39,7 @@ const Dashboard = () => {
   const navItems = useMemo(() => [
     { path: '/dashboard/createrebate', label: 'Apply Rebate', icon: <FaClipboardList className="mr-2" /> },
     { path: '/dashboard/viewrebates', label: 'View Rebates', icon: <FaTable className="mr-2" /> },
+    { path: '/dashboard/editrebates', label: 'Edit Rebates', icon: <FaEdit className="mr-2" /> },
     { path: '/dashboard/students', label: 'Students List', icon: <FaUsers className="mr-2" /> },
     { path: '/dashboard/statistics', label: 'Statistics', icon: <FaChartBar className="mr-2" /> }
   ], []);

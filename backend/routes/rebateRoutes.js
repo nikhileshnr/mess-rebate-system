@@ -1,5 +1,5 @@
 import express from "express";
-import { createRebateEntry, getAllRebates, getStudentRebates, checkRebateOverlap } from "../controllers/rebateController.js";
+import { createRebateEntry, getAllRebates, getStudentRebates, checkRebateOverlap, updateRebates } from "../controllers/rebateController.js";
 import { validateRequest, validateQuery, validateParams } from "../validators/requestValidator.js";
 import { rebateSchemas } from "../validators/schemas.js";
 
@@ -30,5 +30,8 @@ router.get(
   validateQuery(rebateSchemas.checkOverlap), 
   checkRebateOverlap
 );
+
+// Route to update rebate dates
+router.put("/update", validateRequest(rebateSchemas.updateMultiple), updateRebates);
 
 export default router;

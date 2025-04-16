@@ -22,7 +22,34 @@ const validate = (data, schema) => {
     
     // Type check
     if (rules.type && typeof value !== rules.type) {
-      errors.push({ field, message: `${field} must be a ${rules.type}` });
+      // Special handling for arrays since typeof [] is 'object'
+      if (rules.type === 'array' && Array.isArray(value)) {
+        // Array is valid, continue with array-specific validations
+      } else {
+        errors.push({ field, message: `${field} must be a ${rules.type}` });
+      }
+    }
+    
+    // Array-specific validations
+    if (rules.type === 'array' && Array.isArray(value)) {
+      // Min length
+      if (rules.minLength !== undefined && value.length < rules.minLength) {
+        errors.push({ field, message: `${field} must have at least ${rules.minLength} items` });
+      }
+      
+      // Max length
+      if (rules.maxLength !== undefined && value.length > rules.maxLength) {
+        errors.push({ field, message: `${field} must have at most ${rules.maxLength} items` });
+      }
+      
+      // Item validation
+      if (rules.items && value.length > 0) {
+        value.forEach((item, index) => {
+          if (rules.items.type && typeof item !== rules.items.type) {
+            errors.push({ field, message: `${field}[${index}] must be a ${rules.items.type}` });
+          }
+        });
+      }
     }
     
     // String-specific validations

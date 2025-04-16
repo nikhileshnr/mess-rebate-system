@@ -258,7 +258,7 @@ mess-rebate-system/
 │   └── server.js              # Main server file
 ├── frontend/                  # Frontend React application
 │   ├── public/                # Static assets
-│   ├── src/                   # Source code
+│   └── src/                   # Source code
 │       ├── assets/            # Images and other assets
 │       ├── components/        # Reusable UI components
 │       ├── pages/             # Page components
@@ -266,7 +266,7 @@ mess-rebate-system/
 │       ├── App.jsx            # Main App component
 │       ├── api.js             # API communication
 │       ├── index.js           # Application core functions
-│       ├── vite.config.js         # Vite configuration
+│       ├── vite.config.js     # Vite configuration
 │       └── main.jsx           # Application entry point
 ```
 

@@ -3,6 +3,7 @@
  */
 const toRebateResponse = (rebate) => {
   return {
+    id: rebate.id,
     roll_no: rebate.roll_no,
     student_name: rebate.name,
     branch: rebate.branch,

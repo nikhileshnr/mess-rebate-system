@@ -86,13 +86,24 @@ export const createRebateEntry = async (req, res, next) => {
  */
 export const getAllRebates = async (req, res, next) => {
   try {
-    const rebates = await RebateService.getAllRebates();
+    const { year, month } = req.query;
+    
+    let rebates;
+    
+    // If year and month are provided, filter by month
+    if (year && month) {
+      rebates = await RebateService.getRebatesByMonth(parseInt(year), parseInt(month));
+    } else {
+      // Otherwise, get all rebates
+      rebates = await RebateService.getAllRebates();
+    }
     
     // Transform to response format
     const response = rebates.map(rebate => toRebateResponse(rebate));
     
     res.json(response);
   } catch (error) {
+    console.error('Error fetching rebates:', error);
     next(new DatabaseError('Failed to fetch rebates'));
   }
 };
@@ -139,6 +150,44 @@ export const checkRebateOverlap = async (req, res, next) => {
       next(new NotFoundError('Student not found with the provided roll number', 'student'));
     } else {
       next(new ValidationError(error.message));
+    }
+  }
+};
+
+/**
+ * Controller to update multiple rebate entries
+ */
+export const updateRebates = async (req, res, next) => {
+  try {
+    const { rebates } = req.body;
+    
+    if (!rebates || !Array.isArray(rebates) || rebates.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No valid rebates provided for update'
+      });
+    }
+    
+    // Call service to update the rebates
+    const result = await RebateService.updateMultipleRebates(rebates);
+    
+    res.json({
+      success: true,
+      message: 'Rebates updated successfully',
+      updatedCount: result.length
+    });
+  } catch (error) {
+    console.error('Error updating rebates:', error);
+    if (error.message === 'REBATE_NOT_FOUND') {
+      next(new NotFoundError('One or more rebate entries not found', 'rebate'));
+    } else if (error.message === 'INVALID_DATE_RANGE') {
+      next(new ValidationError('End date must be after start date'));
+    } else if (error.message === 'INVALID_DATE_FORMAT') {
+      next(new ValidationError('Invalid date format provided'));
+    } else if (error.message === 'INVALID_ID_FORMAT') {
+      next(new ValidationError('Invalid rebate ID format'));
+    } else {
+      next(new DatabaseError('Failed to update rebate entries: ' + error.message));
     }
   }
 };
